@@ -5,7 +5,7 @@ import (
 	"hash/fnv"
 	"labMapReduce/mapreduce"
 
-	//"strconv"
+	"strconv"
 	"strings"
 	"unicode"
 )
@@ -28,17 +28,14 @@ func mapFunc(input []byte) (result []mapreduce.KeyValue) {
 
 	words = strings.FieldsFunc(text, delimiterFunc)
 
-	//fmt.Printf("%v\n", words) //Para ajudar nos testes. Precisa da biblioteca fmt (acima comentada)
 
 	result = make([]mapreduce.KeyValue, 0)
 
 	for _, word := range words {
-		//COMPLETAR ESSE CÓDIGO
-		//Basta colocar em result os itens <word,"1">
-		//Lembrando: word em minúsculo!
-	}
+        word = strings.ToLower(word)
+        result = append(result, mapreduce.KeyValue{Key:word, Value:"1"})
 
-	//fmt.Printf("%v\n", result) //Para ajudar nos testes. Precisa da biblioteca fmt (acima comentada)
+	}
 
 	return result
 }
@@ -46,30 +43,20 @@ func mapFunc(input []byte) (result []mapreduce.KeyValue) {
 // reduceFunc is called for each merged array of KeyValue resulted from all map jobs.
 // It should return a similar array that summarizes all similar keys in the input.
 func reduceFunc(input []mapreduce.KeyValue) (result []mapreduce.KeyValue) {
-	// 	Maybe it's easier if you have an auxiliary structure:
-	//      var mapAux map[string]int = make(map[string]int)
-	//
-	//  You need to do a loop in input
-	// 	    for _,item := range input {
-	//      ... }
-	//
-	//  You can check if a map have a key as following:
-	// 	    _, ok := mapAux[item.Key]
-	//  ok (true) means that the map has this key
-	//  !ok means that the map does not have this key
-	//
-	// 	Reduce will receive KeyValue pairs (in variable input) that have string values, you may need
-	// 	convert those values to int before being able to use it in operations.
-	//  	package strconv: func Atoi(s string) (int, error)
-	//
-	//  However in result you need KeyValue pairs with strings.
-	//	To convert int to string, use:
-	//	package strconv: func Itoa(i int) string
+    var mapAux map[string]int = make(map[string]int)
+    for _, item := range input {
+        _, ok := mapAux[item.Key]
+        if !ok {
+            mapAux[item.Key] = 0
+        }
+        mapAux[item.Key]++
+    }
 
-	//COMPLETAR ESSE CÓDIGO!!!
-
-	//fmt.Printf("%v\n", result) //Para ajudar nos testes. Precisa da biblioteca fmt (acima comentada)
-
+	result = make([]mapreduce.KeyValue, 0)
+	for word, value := range mapAux {
+        value := strconv.Itoa(value)
+        result = append(result, mapreduce.KeyValue{Key:word, Value:value})
+	}
 	return result
 }
 
